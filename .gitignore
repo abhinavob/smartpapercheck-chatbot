@@ -1,0 +1,36 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments (uv creates .venv; never commit it — uv.lock is the source of truth)
+.venv/
+venv/
+env/
+
+# ---- Environment / secrets ----
+# Never commit real secrets. .env.example IS committed as the documented template.
+.env
+.env.*
+!.env.example
+
+# ---- Tooling caches ----
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ---- IDE / OS ----
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- Node / frontend (added when the frontend slice begins) ----
+node_modules/
+dist-ssr/

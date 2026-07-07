@@ -1,0 +1,24 @@
+# Local development services.
+# FastAPI runs on the host via uv; PostgreSQL runs in Docker.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: spc-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spc
+      POSTGRES_PASSWORD: spc_dev_pw
+      POSTGRES_DB: spc_chatbot
+    ports:
+      - "5432:5432"
+    volumes:
+      - spc_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spc -d spc_chatbot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  spc_pgdata:

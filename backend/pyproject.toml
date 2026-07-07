@@ -1,0 +1,35 @@
+[project]
+name = "spc-chatbot-backend"
+version = "0.1.0"
+description = "AI-powered customer support chatbot backend for SmartPaperCheck"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.18.5",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.139.0",
+    "pydantic-settings>=2.14.2",
+    "pydantic[email]>=2.13.4",
+    "sqlalchemy[asyncio]>=2.0.51",
+    "uvicorn[standard]>=0.50.2",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/W: pycodestyle, F: pyflakes, I: isort, UP: pyupgrade, B: bugbear, ASYNC: async-correctness
+select = ["E", "W", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.20",
+]
