@@ -19,7 +19,7 @@ Use when deciding where code belongs, defining folder structure, wiring the chat
 
 1. `POST /api/v1/chat` — accept a user message + conversation id, return the assistant reply.
 2. Persist every user message and assistant reply to Postgres.
-3. Escalation: when the model invokes the escalate tool (low confidence, or user asks for demo/sales/support/human), collect contact details, store an `escalation_request`, and trigger notifications.
+3. Lead capture: the primary path is a deterministic button → form (`POST /api/v1/leads`); the model may also invoke the `escalate_to_human` tool (low confidence, or user asks for demo/sales/support/human). Both write a `leads` row and trigger notifications.
 4. Brevo notifications: internal alert to the support team + confirmation email to the user.
 5. Retrieval behind an interface — ship a trivial implementation; real RAG comes later.
 
@@ -55,7 +55,7 @@ Dependency direction is one-way: `api → services → (repositories | ai | retr
 
 ## Escalation flow
 
-1. `escalation_service` validates collected contact details, writes an `escalation_request` row.
+1. `escalation_service` validates collected contact details, writes a `leads` row (`source` = `ai_tool`).
 2. It schedules Brevo sends (internal + user confirmation) as **background tasks** so the HTTP response is not blocked.
 3. It returns a user-facing acknowledgement for the assistant to relay.
 
@@ -63,7 +63,7 @@ Escalation is triggered by the model as a **tool call**, never by string-matchin
 
 ## Data model (MVP)
 
-`conversations (id, created_at, ...)` · `messages (id, conversation_id FK, role, content, created_at)` · `escalation_requests (id, conversation_id FK, name, email, phone NULL, preferred_demo_time NULL, reason, status, created_at)`. Types/constraints/indexing per `postgresql-database`.
+`conversations (id, created_at, ...)` · `messages (id, conversation_id FK, role, content, created_at)` · `leads (id, conversation_id FK NULL, name, email, phone NULL, preferred_demo_time NULL, reason, source, status, created_at)` — both the deterministic form and the `escalate_to_human` tool insert here, distinguished by `source` (`form` | `ai_tool`). RAG chunks live in `doc_chunks (id, content, embedding vector(1024), source, title, ...)` (see `rag-retrieval`). Types/constraints/indexing per `postgresql-database`.
 
 ## Incremental build discipline
 
