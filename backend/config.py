@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     admin_email: str                          # Recipient email for alerts
     sender_email: str                         # Brevo-verified sender email address
     website_url: str                          # The specific website URL to scrape and chat about
-    claude_model: str = "claude-3-5-sonnet-20241022"
+    claude_model: str = "claude-sonnet-5"
 
     class Config:
         env_file = ".env"

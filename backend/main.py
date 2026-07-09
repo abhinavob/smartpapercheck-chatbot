@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
-from models import ScrapeRequest, ScrapeResponse, ChatRequest, ChatResponse
+from models import ScrapeResponse, ChatRequest, ChatResponse
 from scraper import scrape_url
 from chunker import chunk_text
 from embedder import get_embedding
@@ -24,7 +24,7 @@ def health():
     return {"status": "ok"}
 
 @app.post("/api/scrape", response_model=ScrapeResponse)
-async def scrape_endpoint(body: ScrapeRequest = None):
+async def scrape_endpoint():
     try:
         url = settings.website_url
         if not url:

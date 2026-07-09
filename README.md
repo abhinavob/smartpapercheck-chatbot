@@ -8,7 +8,7 @@ A production-grade, embeddable support chatbot that uses RAG (Retrieval-Augmente
 - **Frontend**: React + Vite (Vanilla CSS)
 - **Backend**: FastAPI + Uvicorn (Python)
 - **Database**: Supabase (Postgres + pgvector)
-- **LLM**: Claude 3.5 Sonnet
+- **LLM**: Claude Sonnet 5
 - **Embeddings**: Voyage AI (`voyage-3`)
 - **Emails**: Brevo API (SMTP v3)
 
@@ -18,6 +18,7 @@ A production-grade, embeddable support chatbot that uses RAG (Retrieval-Augmente
 
 ### Step 1: Configure Environment Variables
 Before running, you must open the `backend/.env` file and fill in your keys:
+Copy `backend/.env.example` to `backend/.env` and fill in:
 ```env
 SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
@@ -26,8 +27,10 @@ VOYAGE_API_KEY=your_voyage_api_key
 BREVO_API_KEY=your_brevo_api_key
 ADMIN_EMAIL=your_email_address_for_alerts
 SENDER_EMAIL=your_brevo_verified_sender_email
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
+WEBSITE_URL=https://the-site-the-bot-answers-questions-about.com
+CLAUDE_MODEL=claude-sonnet-5
 ```
+Settings rejects unknown variables — do not add keys beyond these.
 
 ---
 
@@ -93,13 +96,13 @@ $$;
 ---
 
 ### Step 3: Run the Backend
-Open a terminal in the `backend/` folder:
+Open a terminal in the `backend/` folder. Dependencies are managed with [uv](https://docs.astral.sh/uv/):
 ```bash
-# 1. Activate the virtual environment
-.\venv\Scripts\activate
+# 1. Install dependencies (also installs the right Python and creates .venv)
+uv sync
 
 # 2. Run the FastAPI server
-uvicorn main:app --reload --port 8000
+uv run uvicorn main:app --reload --port 8000
 ```
 - API Docs will be live at: http://localhost:8000/docs
 

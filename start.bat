@@ -5,7 +5,7 @@ echo ==================================================
 
 :: Start backend in a new command window
 echo 📂 Starting FastAPI Backend on port 8000...
-start cmd /k "cd backend && venv\Scripts\activate && uvicorn main:app --reload --port 8000"
+start cmd /k "cd backend && uv run uvicorn main:app --reload --port 8000"
 
 :: Start frontend in a new command window
 echo 📂 Starting React Frontend on port 5173...
