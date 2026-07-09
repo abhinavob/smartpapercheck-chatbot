@@ -33,7 +33,10 @@ Copy-Item .env.example .env       # Windows (PowerShell)
 # 4. Install dependencies (also installs the correct Python and creates .venv)
 uv sync
 
-# 5. Run the API with autoreload
+# 5. Create the database schema
+uv run alembic upgrade head
+
+# 6. Run the API with autoreload
 uv run uvicorn app.main:app --reload
 ```
 
@@ -49,6 +52,8 @@ Run from `backend/`.
 | Run tests | `uv run pytest` |
 | Lint | `uv run ruff check .` |
 | Format | `uv run ruff format .` |
+| Create a migration | `uv run alembic revision --autogenerate -m "message"` |
+| Apply migrations | `uv run alembic upgrade head` |
 | Stop the database | `docker compose down` (from repo root) |
 | Reset the database | `docker compose down -v` (from repo root; deletes all data) |
 
