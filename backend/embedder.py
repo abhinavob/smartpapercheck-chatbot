@@ -8,19 +8,34 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
-async def get_embedding(text: str) -> list[float]:
-    clean = text.replace("\n", " ").strip()
+BATCH_SIZE = 100
+
+
+async def get_embeddings(texts: list[str]) -> list[list[float]]:
+    """Embed many texts with as few Voyage requests as possible.
+
+    One request per BATCH_SIZE inputs instead of one per text — this is what
+    keeps a full-site ingest under Voyage's rate limit. Returns embeddings in
+    the same order as texts.
+    """
+    cleaned = [t.replace("\n", " ").strip() for t in texts]
+    embeddings: list[list[float]] = []
 
     async with httpx.AsyncClient(timeout=60.0) as client:
-        response = await client.post(
-            VOYAGE_URL,
-            headers=HEADERS,
-            json={
-                "input": [clean],
-                "model": "voyage-3"
-            }
-        )
-        response.raise_for_status()
-        result = response.json()
-        
-        return result["data"][0]["embedding"]
+        for start in range(0, len(cleaned), BATCH_SIZE):
+            batch = cleaned[start:start + BATCH_SIZE]
+            response = await client.post(
+                VOYAGE_URL,
+                headers=HEADERS,
+                json={"input": batch, "model": "voyage-3"}
+            )
+            response.raise_for_status()
+            data = sorted(response.json()["data"], key=lambda item: item["index"])
+            embeddings.extend(item["embedding"] for item in data)
+
+    return embeddings
+
+
+async def get_embedding(text: str) -> list[float]:
+    embeddings = await get_embeddings([text])
+    return embeddings[0]

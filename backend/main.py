@@ -2,9 +2,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from models import ScrapeResponse, ChatRequest, ChatResponse
-from scraper import scrape_url
+from scraper import scrape_site
 from chunker import chunk_text
-from embedder import get_embedding
+from embedder import get_embedding, get_embeddings
 from db import (delete_existing_chunks, save_chunk, search_similar_chunks, save_lead, get_all_leads, get_scraped_urls)
 from agent import chat
 from email_service import send_lead_email
@@ -30,15 +30,15 @@ async def scrape_endpoint():
         if not url:
             raise HTTPException(status_code=400, detail="website_url is not configured in backend .env file.")
             
-        raw_text = await scrape_url(url)
+        raw_text = await scrape_site(url)
         if not raw_text or len(raw_text) < 100:
             raise HTTPException(status_code=400, detail="Could not extract enough text from configured website.")
             
         chunks = chunk_text(raw_text)
-        delete_existing_chunks(url)
+        embeddings = await get_embeddings(chunks)
 
-        for i, chunk in enumerate(chunks):
-            embedding = await get_embedding(chunk)
+        delete_existing_chunks(url)
+        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
             save_chunk(url=url, index=i, chunk=chunk, embedding=embedding)
 
         return ScrapeResponse(success=True, chunks_stored=len(chunks), message=f"Successfully scraped and indexed {url}!")
