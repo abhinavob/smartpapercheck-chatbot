@@ -5,9 +5,9 @@ from models import ScrapeResponse, ChatRequest, ChatResponse
 from scraper import scrape_site
 from chunker import chunk_text
 from embedder import get_embedding, get_embeddings
-from db import (delete_existing_chunks, save_chunk, search_similar_chunks, save_lead, get_all_leads, get_scraped_urls)
+from db import (delete_existing_chunks, save_chunk, search_similar_chunks, save_lead, save_support_query, get_all_leads, get_scraped_urls)
 from agent import chat
-from email_service import send_lead_email
+from email_service import send_lead_email, send_support_email
 
 app = FastAPI(title="Support Chatbot API")
 
@@ -59,14 +59,24 @@ async def chat_endpoint(body: ChatRequest):
         history = [{"role": m.role, "content": m.content} for m in body.history]
         result = chat(body.message, history, context_chunks, url)
 
-        if result["type"] == "tool_call" and result["tool_name"] == "register_demo_lead":
+        if result["type"] == "tool_call":
             args = result["tool_input"]
-            save_lead(args["name"], args["email"], args["phone"], args["preferred_time"], url)
-            await send_lead_email(args["name"], args["email"], args["phone"], args["preferred_time"], url)
-            return ChatResponse(
-                reply=f"✅ Perfect, {args['name']}! Your demo has been scheduled.",
-                lead_captured=True
-            )
+
+            if result["tool_name"] == "register_demo_lead":
+                save_lead(args["name"], args["email"], args["phone"], args["preferred_time"], url)
+                await send_lead_email(args["name"], args["email"], args["phone"], args["preferred_time"], url)
+                return ChatResponse(
+                    reply=f"✅ Perfect, {args['name']}! Your demo has been scheduled.",
+                    lead_captured=True
+                )
+
+            if result["tool_name"] == "escalate_to_human":
+                save_support_query(args["name"], args["email"], args["query"], url)
+                await send_support_email(args["name"], args["email"], args["query"], url)
+                return ChatResponse(
+                    reply=f"✅ Thanks, {args['name']}! I've passed your question to our support team — someone will reach out to you by email shortly.",
+                    lead_captured=False
+                )
 
         return ChatResponse(reply=result["text"], lead_captured=False)
     except Exception as e:

@@ -25,6 +25,30 @@ TOOLS = [
             },
             "required": ["name", "email", "phone", "preferred_time"]
         }
+    },
+    {
+        "name": "escalate_to_human",
+        "description": (
+            "Use this tool to hand a user off to the human support team when you "
+            "CANNOT answer their question from the knowledge base, or when the user "
+            "explicitly asks to talk to a person. "
+            "IMPORTANT RULES: "
+            "1. Only call this after you have collected the user's full name and email. "
+            "2. Ask for name and email one at a time, naturally in the conversation. "
+            "3. Do NOT ask the user to restate their question — they already asked it. Fill the query "
+            "field yourself from what they said earlier in the conversation. "
+            "4. Confirm the details with the user before calling. "
+            "5. NEVER call this tool with missing or placeholder values."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "description": "Full name"},
+                "email": {"type": "string", "description": "Valid email address"},
+                "query": {"type": "string", "description": "The user's question or issue, taken from what they already asked earlier in the conversation"}
+            },
+            "required": ["name", "email", "query"]
+        }
     }
 ]
 
@@ -38,6 +62,10 @@ YOUR RULES:
 3. If the user asks for a demo, ask for their details ONE AT A TIME: Name → Email → Phone → Preferred Time.
 4. Once you have ALL 4, call the register_demo_lead tool immediately.
 5. Never make up information.
+6. If you CANNOT answer from the knowledge base, or the user asks to speak to a human, offer to
+   connect them to the support team. They already told you their question, so do NOT ask for it again —
+   just collect Name → Email, ONE AT A TIME. Then call escalate_to_human, filling the query field with
+   the question they already asked.
 
 === KNOWLEDGE BASE ===
 {context}

@@ -58,3 +58,16 @@ def get_all_leads() -> list[dict]:
         .execute()
     )
     return result.data
+
+def save_support_query(
+    name: str,
+    email: str,
+    query: str,
+    website_url: str
+):
+    supabase.table("support_queries").insert({
+        "name": name,
+        "email": email,
+        "query": query,
+        "website_url": website_url
+    }).execute()

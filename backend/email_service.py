@@ -41,3 +41,43 @@ async def send_lead_email(
             }
         )
         return response.status_code
+
+
+async def send_support_email(
+    name: str,
+    email: str,
+    query: str,
+    website_url: str
+) -> int:
+    html = f"""
+    <h2>New Support Query</h2>
+    <p><b>Name:</b> {name}</p>
+    <p><b>Email:</b> {email}</p>
+    <p><b>Question:</b> {query}</p>
+    <p><b>Website:</b> {website_url}</p>
+    """
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={
+                "api-key": settings.brevo_api_key,
+                "Content-Type": "application/json",
+                "accept": "application/json"
+            },
+            json={
+                "sender": {
+                    "name": "Support Bot",
+                    "email": settings.sender_email
+                },
+                "to": [
+                    {
+                        "email": settings.admin_email,
+                        "name": "Support Team"
+                    }
+                ],
+                "subject": f"New Support Query from {name}",
+                "htmlContent": html
+            }
+        )
+        return response.status_code
